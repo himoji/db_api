@@ -3,18 +3,18 @@ syntax = "proto3";
 package db_api;
 
 service db_api{
-  rpc AddWork(RequestWork) returns (ResponseWork);
-  rpc GetWork(RequestWork) returns (ResponseWork);
+  rpc AddWork(ProtoWork) returns (ProtoWorkIndex);
+  rpc GetWork(ProtoWorkIndex) returns (ProtoWork);
 }
 
-message RequestWork {
+message ProtoWork {
   string name = 1;
   string desc = 2;
   int64 date_start = 3;
   int64 date_end = 4;
 }
 
-message ResponseWork {
-  string status = 1;
+message ProtoWorkIndex{
+  uint64 index = 1;
 }
 

@@ -6,7 +6,7 @@ mod string_work;
 use tonic::{Request, Response, Status};
 use tonic::transport::Server;
 
-use proto::{RequestWork, ResponseWork};
+use proto::{ProtoWork, ProtoWorkIndex};
 use proto::db_api_server::{DbApi, DbApiServer};
 use crate::work::Work;
 
@@ -22,18 +22,18 @@ struct DbService{}
 
 #[tonic::async_trait]
 impl DbApi for DbService {
-    async fn add_work(&self, request: Request<RequestWork>) -> Result<Response<ResponseWork>, Status> {
-        let work = request;
+    async fn add_work(&self, request: Request<ProtoWork>) -> Result<Response<ProtoWorkIndex>, Status> {
+        let work = Work::from_request_work(request.get_ref().clone());
         dbg!(work);
 
-        let resp = ResponseWork {
-            status: "all goog".to_string(),
+        let resp = ProtoWorkIndex {
+            index: 0 //todo!(implement surrealdb or tikv)
         };
 
         Ok(Response::new(resp))
     }
 
-    async fn get_work(&self, request: tonic::Request<RequestWork>) -> Result<Response<ResponseWork>, Status> {
+    async fn get_work(&self, request: Request<ProtoWorkIndex>) -> Result<Response<ProtoWork>, Status> {
         todo!()
     }
 }
@@ -54,6 +54,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_service(DbApiServer::new(db))
         .serve(addr)
         .await?;
+
+
 
     Ok(())
 }

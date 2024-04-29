@@ -7,6 +7,7 @@ Explanation:
     date_end: Stands for task's/work's end DateTime in seconds
 */
 
+use crate::proto;
 use std::collections::HashSet;
 use std::time::Duration;
 
@@ -164,6 +165,15 @@ impl Work {
         );
         str.push(']');
         str
+    }
+
+    pub fn from_request_work(req: proto::ProtoWork) -> Work {
+        Work{
+            name: req.name,
+            desc: req.desc,
+            date_start: req.date_start,
+            date_end: req.date_end,
+        }
     }
 }
 
