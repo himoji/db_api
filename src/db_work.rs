@@ -26,11 +26,10 @@ const WORK_DB_NAME: &str = "work";
 //     Ok(())
 // }
 //
-// pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<Work>> {
-//     let mut resp = db.query("select * from work").await?;
-//     let old_vec: Vec<Work> = resp.take(0)?;
-//     Ok(old_vec)
-// }
+pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<Work>> {
+    let resp: Vec<Work> = db.select(WORK_DB_NAME).await?;
+    Ok(resp)
+}
 //
 // pub async fn add_works_vec(db: &Surreal<Client>, vec: Vec<Work>) -> surrealdb::Result<()> {
 //     for work in vec {

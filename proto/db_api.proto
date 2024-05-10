@@ -5,16 +5,18 @@ package db_api;
 service db_api{
   rpc AddWork(ProtoWork) returns (ProtoWorkIndex);
   rpc GetWork(ProtoWorkIndex) returns (ProtoWork);
+  rpc GetAllWorks(Empty) returns (ProtoWork);
 }
 
 message ProtoWork {
-  string name = 1;
-  string desc = 2;
-  int64 date_start = 3;
-  int64 date_end = 4;
+  repeated string name = 1;
+  repeated string desc = 2;
+  repeated int64 date_start = 3;
+  repeated int64 date_end = 4;
 }
 
 message ProtoWorkIndex{
   string index = 1;
 }
 
+message Empty {}

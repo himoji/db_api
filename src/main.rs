@@ -67,6 +67,27 @@ impl DbApi for DbService {
 
         Ok(Response::new(resp))
     }
+
+    async fn get_all_works(&self, _request: Request<ProtoWorkIndex>) -> Result<Response<ProtoWork>, Status> {
+        let work = match db_work::get_all_works(&self.db).await {
+            Err(err) => {
+                format!("[ERROR]: Failed to get works from database: {}", err);
+                return Err(Status::internal("Internal server error: Database operation failed"));
+            },
+            Ok(work) => {work}
+        };
+
+        dbg!(work.clone());
+
+        let resp = ProtoWork{
+            name: work.name,
+            desc: work.desc,
+            date_start: work.date_start,
+            date_end: work.date_end,
+        };
+
+        Ok(Response::new(resp))
+    }
 }
 
 
@@ -88,8 +109,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_service(DbApiServer::new(db))
         .serve(addr)
         .await?;
-
-
 
     Ok(())
 }
