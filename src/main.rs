@@ -8,7 +8,7 @@ use surrealdb::Surreal;
 use tonic::{Request, Response, Status};
 use tonic::transport::Server;
 
-use proto::{ProtoWork, ProtoWorkIndex};
+use proto::{ProtoWork, ProtoWorkIndex, Empty, GetAllWorksResponse};
 use proto::db_api_server::{DbApi, DbApiServer};
 use crate::work::Work;
 
@@ -68,8 +68,8 @@ impl DbApi for DbService {
         Ok(Response::new(resp))
     }
 
-    async fn get_all_works(&self, _request: Request<ProtoWorkIndex>) -> Result<Response<ProtoWork>, Status> {
-        let work = match db_work::get_all_works(&self.db).await {
+    async fn get_all_works(&self, _request: Request<Empty>) -> Result<Response<GetAllWorksResponse>, Status> {
+        let works = match db_work::get_all_works(&self.db).await {
             Err(err) => {
                 format!("[ERROR]: Failed to get works from database: {}", err);
                 return Err(Status::internal("Internal server error: Database operation failed"));
@@ -77,14 +77,18 @@ impl DbApi for DbService {
             Ok(work) => {work}
         };
 
-        dbg!(work.clone());
-
-        let resp = ProtoWork{
-            name: work.name,
-            desc: work.desc,
-            date_start: work.date_start,
-            date_end: work.date_end,
+        let mut resp = GetAllWorksResponse {
+            works: vec![]
         };
+
+        for work in works {
+            resp.works.push(ProtoWork{
+                name: work.name,
+                desc: work.desc,
+                date_start: work.date_start,
+                date_end: work.date_end,
+            });
+        }
 
         Ok(Response::new(resp))
     }
