@@ -17,27 +17,10 @@ impl UserData {
 
 const WORK_DB_NAME: &str = "work";
 
-// pub async fn add_filter_works_vec(db: &Surreal<Client>, vec: Vec<Work>) -> surrealdb::Result<()> {
-//     let a = Work::remove_duplicates(get_all_works(db).await?, vec);
-//     dbg!(&a);
-//
-//     add_works_vec(db, a).await?;
-//
-//     Ok(())
-// }
-//
 pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<Work>> {
     let resp: Vec<Work> = db.select(WORK_DB_NAME).await?;
     Ok(resp)
 }
-//
-// pub async fn add_works_vec(db: &Surreal<Client>, vec: Vec<Work>) -> surrealdb::Result<()> {
-//     for work in vec {
-//         let created: Vec<UserData> = db.create("work").content(work).await?;
-//         dbg!(created);
-//     }
-//     Ok(())
-// }
 
 pub async fn add_work(db: &Surreal<Client>, work: Work) -> surrealdb::Result<String> {
     let created: Vec<UserData> = db.create(WORK_DB_NAME).content(work).await?;

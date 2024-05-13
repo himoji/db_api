@@ -27,6 +27,11 @@ struct DbService{
 #[tonic::async_trait]
 impl DbApi for DbService {
     async fn add_work(&self, request: Request<ProtoWork>) -> Result<Response<ProtoWorkIndex>, Status> {
+        //! Proto-func to handle add_work():
+        //!
+        //! Request: Work
+        //!
+        //! Response: Index in database
         let work = Work::from_request_work(request.get_ref().clone());
         dbg!(work.clone());
 
@@ -46,6 +51,12 @@ impl DbApi for DbService {
     }
 
     async fn get_work(&self, request: Request<ProtoWorkIndex>) -> Result<Response<ProtoWork>, Status> {
+        //! Proto-func to handle get_work():
+        //!
+        //! Request: Index in database
+        //!
+        //! Response: Work
+
         let index = request.into_inner().index;
 
         let work = match db_work::get_work(&self.db, index).await {
@@ -69,6 +80,12 @@ impl DbApi for DbService {
     }
 
     async fn get_all_works(&self, _request: Request<Empty>) -> Result<Response<GetAllWorksResponse>, Status> {
+        //! Proto-func to handle get_work():
+        //!
+        //! Request: Empty
+        //!
+        //! Response: Vec< Work >
+
         let works = match db_work::get_all_works(&self.db).await {
             Err(err) => {
                 format!("[ERROR]: Failed to get works from database: {}", err);
@@ -100,7 +117,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = Surreal::new::<Ws>("127.0.0.1:8000").await?;
     db.use_ns("test").use_db("test").await?;
 
-    let addr = "[::1]:50051".parse()?;
+    let addr = "0.0.0.0:50051".parse()?;
     let service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
         .build()?;
@@ -109,6 +126,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{}", addr);
     Server::builder()
+        .accept_http1(true)
         .add_service(service)
         .add_service(DbApiServer::new(db))
         .serve(addr)
