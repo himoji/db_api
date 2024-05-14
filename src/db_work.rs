@@ -3,7 +3,7 @@ use surrealdb::engine::remote::ws::Client;
 use surrealdb::sql::{Thing};
 use surrealdb::{Surreal};
 
-use crate::work::Work;
+use crate::work::{Work, WorkParams};
 
 #[derive(Deserialize, Serialize, Debug)]
 struct UserData {
@@ -29,6 +29,16 @@ pub async fn add_work(db: &Surreal<Client>, work: Work) -> surrealdb::Result<Str
     let id = created.first().unwrap().get_id();
 
     Ok(id)
+}
+
+pub async fn edit_work(db: &Surreal<Client>, index: String, param: WorkParams) ->  surrealdb::Result<Work> {
+    let mut work = get_work(db, index.clone()).await.expect("Failed to get work");
+    work.edit(param);
+    let work_upd: Option<Work> = db.update((WORK_DB_NAME, index))
+        .content(work)
+        .await?;
+    
+    Ok(work_upd.expect("Fail"))
 }
 
 pub async fn get_work(db: &Surreal<Client>, index: String) -> surrealdb::Result<Work> {

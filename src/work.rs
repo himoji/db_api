@@ -20,6 +20,18 @@ pub enum WorkParams {
     DateStart(i64),
     DateEnd(i64),
 }
+
+impl WorkParams {
+   pub fn as_str_name(&self) -> &'static str {
+       match self {
+           WorkParams::Name(_) => "Name",
+           WorkParams::Desc(_) => "Desc",
+           WorkParams::DateStart(_) => "DateStart",
+           WorkParams::DateEnd(_)  => "DateEnd",
+       }
+   }
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Hash, Eq, PartialEq, Debug, Clone)]
 pub struct Work {
     pub name: String,

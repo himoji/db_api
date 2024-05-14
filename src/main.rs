@@ -8,9 +8,10 @@ use surrealdb::Surreal;
 use tonic::{Request, Response, Status};
 use tonic::transport::Server;
 
-use proto::{ProtoWork, ProtoWorkIndex, Empty, GetAllWorksResponse};
+use proto::{ProtoWork, ProtoWorkIndex, Empty, GetAllWorksResponse, ProtoWorkParam};
 use proto::db_api_server::{DbApi, DbApiServer};
-use crate::work::Work;
+use crate::db_work::edit_work;
+use crate::work::{Work, WorkParams};
 
 mod proto {
     tonic::include_proto!("db_api");
@@ -48,6 +49,37 @@ impl DbApi for DbService {
         };
 
         Ok(Response::new(resp))
+    }
+
+    async fn edit_work(&self, request: Request<ProtoWorkParam>) -> Result<Response<ProtoWork>, Status> {
+        //! Proto-func to handle edit_work():
+        //!
+        //! Request: Index in database, WorkParam, Value
+        //!
+        //! Response: Work
+        
+        let req = request.get_ref().clone();
+        let index = req.index;
+        let enudm = req.r#enum.to_string();
+        let value = req.value;
+
+        let a = match enudm.as_str() {
+            "0" => {
+                edit_work(&self.db, index, WorkParams::Name(value)).await.expect("fail")
+            },
+            "1" => {
+                edit_work(&self.db, index, WorkParams::Desc(value)).await.expect("fail")
+            },
+            "2" => {
+                edit_work(&self.db, index, WorkParams::DateStart(value.parse().unwrap())).await.expect("fail")
+            },
+            "3" => {
+                edit_work(&self.db, index, WorkParams::DateEnd(value.parse().unwrap())).await.expect("fail")
+            },
+            _ => {Work::new()},
+        };
+
+        Ok(Response::new(ProtoWork{ name: a.name, desc: a.desc, date_start: a.date_start, date_end: a.date_end }))
     }
 
     async fn get_work(&self, request: Request<ProtoWorkIndex>) -> Result<Response<ProtoWork>, Status> {
