@@ -1,14 +1,13 @@
 mod db_work;
-mod time_work;
 mod work;
-mod string_work;
+
 
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::Surreal;
 use tonic::{Request, Response, Status};
 use tonic::transport::Server;
 
-use proto::{ProtoWork, ProtoWorkIndex, Empty, GetAllWorksResponse, ProtoWorkParam};
+use proto::{ProtoWork, ProtoWorkIndex, Empty, GetAllWorksResponse, ProtoWorkParam, ProtoWorkWithId};
 use proto::db_api_server::{DbApi, DbApiServer};
 use crate::db_work::edit_work;
 use crate::work::{Work, WorkParams};
@@ -19,6 +18,8 @@ mod proto {
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
         tonic::include_file_descriptor_set!("db_api_descriptor");
 }
+
+
 
 #[derive(Debug)]
 struct DbService{
@@ -96,15 +97,16 @@ impl DbApi for DbService {
         };
 
         let mut resp = GetAllWorksResponse {
-            works: vec![]
+            works: vec![],
         };
 
         for work in works {
-            resp.works.push(ProtoWork{
+            resp.works.push(ProtoWorkWithId{
                 name: work.name,
                 desc: work.desc,
                 date_start: work.date_start,
                 date_end: work.date_end,
+                index: work.index
             });
         }
 

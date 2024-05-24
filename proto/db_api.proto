@@ -33,7 +33,15 @@ message ProtoWorkIndex{
 }
 
 message GetAllWorksResponse {
-  repeated ProtoWork works = 1;
+  repeated ProtoWorkWithId works = 1;
 }
 
 message Empty {}
+
+message ProtoWorkWithId {
+  string name = 1;
+  string desc = 2;
+  int64 date_start = 3;
+  int64 date_end = 4;
+  string index = 5;
+}

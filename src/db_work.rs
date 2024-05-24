@@ -15,10 +15,20 @@ impl UserData {
     }
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct WorkWithId {
+    pub name: String,
+    pub desc: String,
+    pub date_start: i64,
+    pub date_end: i64,
+    pub index: String,
+}
+
+
 const WORK_DB_NAME: &str = "work";
 
-pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<Work>> {
-    let resp: Vec<Work> = db.select(WORK_DB_NAME).await?;
+pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<WorkWithId>> {
+    let resp: Vec<WorkWithId> = db.select(WORK_DB_NAME).await?;
     Ok(resp)
 }
 
