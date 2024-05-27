@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::sql::{Thing};
 use surrealdb::{Surreal};
+use surrealdb::sql::Value;
 
 use crate::work::{Work, WorkParams};
 
@@ -15,21 +16,29 @@ impl UserData {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct WorkWithId {
     pub name: String,
     pub desc: String,
     pub date_start: i64,
     pub date_end: i64,
-    pub index: String,
+    pub id: Thing,
 }
 
 
 const WORK_DB_NAME: &str = "work";
 
-pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<WorkWithId>> {
-    let resp: Vec<WorkWithId> = db.select(WORK_DB_NAME).await?;
-    Ok(resp)
+pub async fn get_all_works(db: &Surreal<Client>) -> surrealdb::Result<Vec<Work>> {
+    println!("get all works call db");
+
+    let raw_data: Vec<WorkWithId> = db.select(WORK_DB_NAME).await.expect("vgdggd");
+    let mut works: Vec<Work> = Vec::new();
+    
+    for val in raw_data {
+        works.push(Work::from(val.name, val.desc, val.date_start, val.date_end, val.id.id.to_string()))
+    }
+    
+    Ok(works)
 }
 
 pub async fn add_work(db: &Surreal<Client>, work: Work) -> surrealdb::Result<String> {

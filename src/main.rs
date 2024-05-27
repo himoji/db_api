@@ -90,11 +90,12 @@ impl DbApi for DbService {
 
         let works = match db_work::get_all_works(&self.db).await {
             Err(err) => {
-                format!("[ERROR]: Failed to get works from database: {}", err);
+                println!("get all works err {err}");
                 return Err(Status::internal("Internal server error: Database operation failed"));
             },
             Ok(work) => {work}
         };
+        println!("Get all works OK!");
 
         let mut resp = GetAllWorksResponse {
             works: vec![],
@@ -106,7 +107,7 @@ impl DbApi for DbService {
                 desc: work.desc,
                 date_start: work.date_start,
                 date_end: work.date_end,
-                index: work.index
+                index: work.id
             });
         }
 
@@ -151,7 +152,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = Surreal::new::<Ws>("127.0.0.1:8000").await?;
     db.use_ns("test").use_db("test").await?;
 
-    let addr = "0.0.0.0:50051".parse()?;
+    let addr = "[::1]:50051".parse()?;
     let service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
         .build()?;
@@ -160,7 +161,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{}", addr);
     Server::builder()
-        .accept_http1(true)
         .add_service(service)
         .add_service(DbApiServer::new(db))
         .serve(addr)

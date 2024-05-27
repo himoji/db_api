@@ -7,13 +7,11 @@ Explanation:
     date_end: Stands for task's/work's end DateTime in seconds
 */
 
-use crate::proto;
 use std::collections::HashSet;
 use std::time::Duration;
 
 use chrono::TimeZone;
-
-
+use crate::proto::ProtoWork;
 
 #[derive(Debug)]
 pub enum WorkParams {
@@ -22,24 +20,19 @@ pub enum WorkParams {
     DateStart(i64),
     DateEnd(i64),
 }
-
-impl WorkParams {
-   pub fn as_str_name(&self) -> &'static str {
-       match self {
-           WorkParams::Name(_) => "Name",
-           WorkParams::Desc(_) => "Desc",
-           WorkParams::DateStart(_) => "DateStart",
-           WorkParams::DateEnd(_)  => "DateEnd",
-       }
-   }
-}
-
 #[derive(serde::Serialize, serde::Deserialize, Hash, Eq, PartialEq, Debug, Clone)]
 pub struct Work {
     pub name: String,
     pub desc: String,
     pub date_start: i64,
     pub date_end: i64,
+    pub id: String,
+}
+
+impl Work {
+    pub(crate) fn from_request_work(proto_work: ProtoWork) -> Work {
+        Work::from(proto_work.name,proto_work.desc,proto_work.date_start,proto_work.date_end,"".to_string())
+    }
 }
 
 impl Work {
@@ -51,15 +44,17 @@ impl Work {
             desc: "".to_string(),
             date_start: 0,
             date_end: 0,
+            id: "".to_string(),
         }
     }
-    pub fn from(name: String, desc: String, date_start: i64, date_end: i64) -> Work {
+    pub fn from(name: String, desc: String, date_start: i64, date_end: i64, index: String) -> Work {
         //!Creates work with specified params
         Work {
             name,
             desc,
             date_start,
             date_end,
+            id: index,
         }
     }
 
@@ -120,6 +115,7 @@ impl Work {
                 desc,
                 date_start,
                 date_end,
+                id: "".to_string(),
             })
         }
     }
@@ -179,15 +175,6 @@ impl Work {
         );
         str.push(']');
         str
-    }
-
-    pub fn from_request_work(req: proto::ProtoWork) -> Work {
-        Work{
-            name: req.name,
-            desc: req.desc,
-            date_start: req.date_start,
-            date_end: req.date_end,
-        }
     }
 }
 
