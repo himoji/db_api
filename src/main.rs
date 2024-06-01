@@ -128,16 +128,16 @@ impl DbApi for DbService {
 
         let a = match enudm.as_str() {
             "0" => {
-                edit_work(&self.db, index, WorkParams::Name(value)).await.expect("fail")
+                edit_work(&self.db, index, WorkParams::Name(value)).await.expect("fail name")
             },
             "1" => {
-                edit_work(&self.db, index, WorkParams::Desc(value)).await.expect("fail")
+                edit_work(&self.db, index, WorkParams::Desc(value)).await.expect("fail desc")
             },
             "2" => {
-                edit_work(&self.db, index, WorkParams::DateStart(value.parse().unwrap())).await.expect("fail")
+                edit_work(&self.db, index, WorkParams::DateStart(value.parse().unwrap())).await.expect("fail date_start")
             },
             "3" => {
-                edit_work(&self.db, index, WorkParams::DateEnd(value.parse().unwrap())).await.expect("fail")
+                edit_work(&self.db, index, WorkParams::DateEnd(value.parse().unwrap())).await.expect("fail date_end")
             },
             _ => {Work::new()},
         };
